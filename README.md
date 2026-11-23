@@ -1,4 +1,15 @@
-# Aranter — Agent Office
+# AI-Agent-Office-For-Aranter
+# by Oktovaaaaa
+
+
+# Project ini dibuat untuk mengetahu isi dari proses agent ai aranter
+## Panduan menggunakan office aranter
+
+**Live demo:** https://oktovaaaaa.github.io/AI-Agent-Office-For-Aranter/
+
+---
+
+## Aranter — Agent Office
 
 Kantor 3D (Three.js) tempat "karyawan" Aranter bekerja. Setiap karakter mewakili satu tahap pipeline di bot
 [Agent-AI-For-Trade](https://github.com/oktovaaaaa/Agent-AI-For-Trade), dan aktivitasnya diputar dari data scan asli
