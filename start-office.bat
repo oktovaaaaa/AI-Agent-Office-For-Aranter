@@ -15,7 +15,7 @@ if errorlevel 1 (
 REM 2) Web kantor 3D
 echo Membuka Aranter di http://localhost:%PORT%  (tutup jendela ini untuk berhenti)
 start "" "http://localhost:%PORT%/index.html"
-python -m http.server %PORT%
+python serve.py %PORT%
 if errorlevel 1 (
   echo.
   echo Python tidak ditemukan / port %PORT% terpakai. Coba: npx serve -l %PORT%
