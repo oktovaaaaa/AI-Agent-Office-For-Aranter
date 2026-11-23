@@ -91,8 +91,8 @@ export class Replay {
     this.ui.log('👮', 'Satpam: cek status pasar via BBCA');
     this.at(1.5, () => {
       this.onLights(true);
-      drawSign(office.sign, true, scan.session_label || scan.session || '');
-      g.say(`Pasar OK · ${scan.session_label || 'sesi aktif'}`, 2.2);
+      drawSign(office.sign, 'replay', `${scan.date_display || ''} · ${scan.session_label || scan.session || ''}`);
+      g.say(`Replay · ${scan.session_label || 'scan tersimpan'}`, 2.2);
     });
 
     this.at(2.2, () => {
@@ -258,12 +258,17 @@ export class Replay {
 
   applySession(m) {
     const { office, agents } = this;
-    const open = m.status === 'OPEN';
-    this.onLights(open || m.status === 'BREAK');
-    drawSign(office.sign, open, m.name || (open ? 'Sesi aktif' : 'Tutup'));
-    if (m.status === 'OPEN') agents.guard.say(`BBCA terbaca · ${m.name || 'pasar buka'}`, 3);
-    else if (m.status === 'BREAK') agents.guard.say('Istirahat siang ☕', 3);
-    else if (m.status) agents.guard.say(m.name || 'Pasar tutup', 3);
+    const st = m.status;
+    const open = st === 'OPEN';
+    // lampu terang hanya saat pasar buka; istirahat agak redup; tutup/penutupan = suasana sore
+    this.onLights(open ? 1 : st === 'BREAK' ? 0.65 : 0.25);
+    const sign = open ? 'open' : st === 'BREAK' ? 'break' : st === 'CLOSING' ? 'closing' : 'closed';
+    drawSign(office.sign, sign, m.name || (open ? 'Sesi aktif' : 'Tutup'));
+    if (open) agents.guard.say(`BBCA terbaca · ${m.name || 'pasar buka'}`, 3);
+    else if (st === 'BREAK') agents.guard.say('Istirahat siang ☕ tim menyimpan snapshot Sesi I', 4);
+    else if (st === 'CLOSING') agents.guard.say('Pasar tutup 🔒 tim menyelesaikan audit penutupan', 5);
+    else if (st) agents.guard.say(m.name || 'Pasar tutup', 3);
+    if (st === 'CLOSING' || st === 'BREAK') agents.hunter.say(st === 'CLOSING' ? 'Audit VIP penutupan…' : 'Snapshot siang…', 3);
   }
 
   liveEvent(e) {
@@ -273,6 +278,11 @@ export class Replay {
       case 'session':
         this.applySession(e);
         this.ui.setLive(true, e.name || '');
+        if (e.status === 'ENDED') { // runner bot selesai: semua istirahat
+          agents.scanners.forEach((s) => s.setWorking(false));
+          agents.tech.setWorking(false);
+          agents.tech.say('Semua worker dimatikan ✔', 4);
+        }
         this.ui.log('👮', `Sesi: ${e.name || e.status}`);
         break;
       case 'cycle_start':

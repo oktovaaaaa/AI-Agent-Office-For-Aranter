@@ -168,7 +168,7 @@ const ui = new UI({
   onView: (v) => { if (rig.mode !== 'drone') setCameraMode('drone'); rig.view(v); },
 });
 let liveWanted = true; // otomatis ikut LIVE saat bot berjalan
-const replay = new Replay({ office, agents, fx, ui, onLights: (on) => { lightTarget = on ? 1 : 0; } });
+const replay = new Replay({ office, agents, fx, ui, onLights: (on) => { lightTarget = typeof on === 'number' ? on : on ? 1 : 0; } });
 const chat = new Chat({ getHistory: () => history, research: agents.research, screen: office.researchScreen });
 chat.onToggle = (open) => {
   chatOpen = open;

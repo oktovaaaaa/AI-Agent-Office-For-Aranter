@@ -128,19 +128,30 @@ export function drawBoard(panel, title, subtitle, rows, accent = '#22c55e') {
   tex.needsUpdate = true;
 }
 
-export function drawSign(panel, open, text) {
+// state: true / 'open' = PASAR BUKA, false / 'closed' = PASAR TUTUP, 'closing' = penutupan (audit),
+//        'break' = istirahat siang, 'replay' = memutar ulang data tersimpan
+const SIGN = {
+  open: ['PASAR BUKA', '#065f46', '#34d399'],
+  closed: ['PASAR TUTUP', '#7f1d1d', '#f87171'],
+  closing: ['PASAR TUTUP', '#92400e', '#fbbf24'],
+  break: ['ISTIRAHAT', '#1e3a5f', '#60a5fa'],
+  replay: ['REPLAY', '#334155', '#94a3b8'],
+};
+export function drawSign(panel, state, text) {
   const { ctx, canvas, tex } = panel;
   const W = canvas.width, H = canvas.height;
-  ctx.fillStyle = open ? '#065f46' : '#7f1d1d';
+  const key = state === true ? 'open' : state === false ? 'closed' : state;
+  const [title, bg, line] = SIGN[key] || SIGN.closed;
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
-  ctx.strokeStyle = open ? '#34d399' : '#f87171';
+  ctx.strokeStyle = line;
   ctx.lineWidth = H * 0.06;
   ctx.strokeRect(0, 0, W, H);
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font = `800 ${H * 0.36}px Inter, sans-serif`;
-  ctx.fillText(open ? 'PASAR BUKA' : 'PASAR TUTUP', W / 2, H * 0.38);
+  ctx.fillText(title, W / 2, H * 0.38);
   ctx.font = `600 ${H * 0.2}px Inter, sans-serif`;
   ctx.fillText(text || '', W / 2, H * 0.74);
   tex.needsUpdate = true;
