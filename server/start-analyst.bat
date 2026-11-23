@@ -16,5 +16,6 @@ REM Isi nilai yang SAMA di GitHub repo bot: Settings / Secrets / Actions / LIVE_
 if not exist .live_token python -c "import secrets;print(secrets.token_urlsafe(24))" > .live_token
 set /p LIVE_TOKEN=<.live_token
 
+set PORT=8787
 python analyst_bridge.py
 pause

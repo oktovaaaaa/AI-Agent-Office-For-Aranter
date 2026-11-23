@@ -8,12 +8,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=20261123c" />
+  <script>window.ARANTER_BUILD = "20261123c";</script>
   <script type="importmap">
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+        "./js/agents.js": "./js/agents.js?v=20261123c",
+        "./js/chat.js": "./js/chat.js?v=20261123c",
+        "./js/config.js": "./js/config.js?v=20261123c",
+        "./js/data.js": "./js/data.js?v=20261123c",
+        "./js/fx.js": "./js/fx.js?v=20261123c",
+        "./js/office.js": "./js/office.js?v=20261123c",
+        "./js/sim.js": "./js/sim.js?v=20261123c",
+        "./js/ui.js": "./js/ui.js?v=20261123c"
       }
     }
   </script>
@@ -23,7 +32,7 @@
 
   <!-- Kiri atas: identitas + status -->
   <header class="brand-chip glass">
-    <img class="logo-img" src="assets/aranter-logo.png" alt="" width="26" height="26" />
+    <img class="logo-img" src="assets/aranter-logo.png?v=20261123c" alt="" width="26" height="26" />
     <span class="brand-name">Aranter</span>
     <button id="liveBadge" class="live" title="Status data">Replay</button>
   </header>
@@ -86,7 +95,7 @@
 
   <section id="chat" class="chat glass" aria-label="Chat Analis Riset AI">
     <div class="chat-h">
-      <img class="logo-img sm" src="assets/aranter-logo.png" alt="" width="22" height="22" />
+      <img class="logo-img sm" src="assets/aranter-logo.png?v=20261123c" alt="" width="22" height="22" />
       <div><b>Analis Riset AI</b><div id="chatEngine" class="src">…</div></div>
       <button id="chatClose" class="x" aria-label="Tutup chat">✕</button>
     </div>
@@ -106,7 +115,7 @@
 
   <div id="loading">
     <div class="ld-card">
-      <img class="logo-img big" src="assets/aranter-logo.png" alt="Aranter" width="72" height="72" />
+      <img class="logo-img big" src="assets/aranter-logo.png?v=20261123c" alt="Aranter" width="72" height="72" />
       <div class="ld-title">Aranter</div>
       <div class="ld-bar"><i id="loadBar"></i></div>
       <div id="loadText" class="ld-text">Memuat…</div>
@@ -122,6 +131,6 @@
         '<code>python -m http.server 8080</code> lalu buka <b>http://localhost:8080</b>';
     }
   </script>
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js?v=20261123c"></script>
 </body>
 </html>

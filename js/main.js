@@ -66,11 +66,11 @@ function applyLights(level) {
 document.getElementById('loadText').textContent = 'Memuat model 3D kantor (Blender)…';
 const gltfLoader = new GLTFLoader();
 const [officeGltf, agentsGltf] = await Promise.all([
-  gltfLoader.loadAsync('assets/office.glb').catch((e) => {
+  gltfLoader.loadAsync(`assets/office.glb?v=${window.ARANTER_BUILD || ''}`).catch((e) => {
     document.getElementById('loadText').innerHTML = 'Gagal memuat <b>assets/office.glb</b>. Jalankan <code>build-blender.bat</code> dulu.';
     throw e;
   }),
-  gltfLoader.loadAsync('assets/agents.glb').catch((e) => { console.warn('agents.glb gagal, pakai karakter cadangan', e); return null; }),
+  gltfLoader.loadAsync(`assets/agents.glb?v=${window.ARANTER_BUILD || ''}`).catch((e) => { console.warn('agents.glb gagal, pakai karakter cadangan', e); return null; }),
 ]);
 const office = buildOffice(scene, officeGltf);
 office.floorLabels.visible = false;
