@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aranter — Agent Office</title>
+  <meta name="description" content="Kantor 3D tempat agent Aranter bekerja: screener, scanner RallyGood, analis SMC/DonAlt/MACD, dan kurir WhatsApp." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2322c55e%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 font-family=%22sans-serif%22 font-weight=%22800%22 text-anchor=%22middle%22 fill=%22%2304111d%22%3EA%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <header class="topbar glass">
+    <div class="brand">
+      <div class="logo">A</div>
+      <div>
+        <div class="title">Aranter <span class="sub">Agent Office</span> <span id="liveBadge" class="live">○ REPLAY</span></div>
+        <div id="srcInfo" class="src">menghubungkan…</div>
+      </div>
+    </div>
+    <div class="controls">
+      <select id="dateSelect" aria-label="Pilih tanggal scan"></select>
+      <button id="btnPlay">⏸ Jeda</button>
+      <div class="seg">
+        <button data-speed="1" class="active">1x</button>
+        <button data-speed="3">3x</button>
+        <button data-speed="10">10x</button>
+      </div>
+      <button id="btnLabels" class="active" title="Tampilkan nama agen">🏷️</button>
+    </div>
+  </header>
+
+  <section class="stats glass">
+    <div><span>Screener</span><b id="stTotal">0</b></div>
+    <div><span>Diproses</span><b id="stProg">0/0</b></div>
+    <div><span>VVIP 3 TF</span><b id="stVip" class="g">0</b></div>
+    <div><span>Radar 2 TF</span><b id="stRadar" class="y">0</b></div>
+    <div><span>Alert WA</span><b id="stAlert">0</b></div>
+    <div class="prog"><i id="progFill"></i></div>
+  </section>
+
+  <section id="logBox" class="log glass collapsed">
+    <button id="logToggle" class="log-h" aria-expanded="false">Aktivitas Kantor <span class="chev">▸</span></button>
+    <ul id="logList"></ul>
+  </section>
+
+  <aside id="panel" class="panel glass">
+    <button id="panelClose" class="x" aria-label="Tutup">✕</button>
+    <div id="panelBody"></div>
+  </aside>
+
+  <button id="chatToggle" class="chat-toggle" title="Tanya Analis Riset AI">💬 Tanya Analis</button>
+  <section id="chat" class="chat glass" aria-label="Chat Analis Riset AI">
+    <div class="chat-h">
+      <div><b>Analis Riset AI</b><div id="chatEngine" class="src">…</div></div>
+      <button id="chatClose" class="x" aria-label="Tutup chat">✕</button>
+    </div>
+    <div id="chatLog" class="chat-log"></div>
+    <div id="chatChips" class="chips quick">
+      <button class="chip ask" data-q="VVIP hari ini">VVIP hari ini</button>
+      <button class="chip ask" data-q="analisa dot green PADA">Dot green PADA</button>
+      <button class="chip ask" data-q="berita PADA good news atau bad news?">Berita PADA</button>
+    </div>
+    <form id="chatForm" class="chat-form">
+      <input id="chatInput" autocomplete="off" maxlength="1200" placeholder="mis. analisa PADA, ada berita apa?" />
+      <button id="chatSend" type="submit">Kirim</button>
+    </form>
+  </section>
+
+  <div class="hint">Klik agen, monitor, papan VVIP, whiteboard, kabinet arsip · klik Analis Riset AI untuk chat</div>
+
+  <div id="loading">
+    <div class="ld-card">
+      <div class="logo big">A</div>
+      <div class="ld-title">Aranter</div>
+      <div class="ld-sub">Agent Office</div>
+      <div class="ld-bar"><i id="loadBar"></i></div>
+      <div id="loadText" class="ld-text">Memuat…</div>
+    </div>
+  </div>
+
+  <script>
+    // Browser memblokir ES module dari file:// — beri petunjuk, jangan diam di "Memuat…"
+    if (location.protocol === 'file:') {
+      document.getElementById('loadText').innerHTML =
+        'Halaman ini dibuka sebagai <b>file://</b>, browser memblokir modul JavaScript.<br>' +
+        'Klik dua kali <b>start-office.bat</b> di folder ini, atau jalankan<br>' +
+        '<code>python -m http.server 8080</code> lalu buka <b>http://localhost:8080</b>';
+    }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

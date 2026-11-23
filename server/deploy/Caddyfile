@@ -1,0 +1,5 @@
+# HTTPS otomatis (Let's Encrypt) untuk domain di LIVE_DOMAIN, mis. live.aranter.web.id
+{$LIVE_DOMAIN} {
+	encode gzip
+	reverse_proxy bridge:8787
+}

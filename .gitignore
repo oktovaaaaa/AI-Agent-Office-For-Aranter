@@ -1,0 +1,7 @@
+data/history.json
+__pycache__/
+*.blend1
+server/agy_workspace/
+server/bridge.log
+server/.live_token
+server/deploy/.env
