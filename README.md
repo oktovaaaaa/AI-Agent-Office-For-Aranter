@@ -112,6 +112,10 @@ chat di kantor 3D ──POST /api/analyze {symbol, question}──► server/ana
 UI tidak menampilkan nama mesin AI; status chat hanya "online / offline".
 Kode saham yang juga kata umum (PADA = "pada") hanya dikenali kalau ditulis HURUF BESAR di chat.
 
+**Server (Docker):** image `server/deploy/Dockerfile` sudah berisi Antigravity CLI (`agy`). Login sekali dengan akun Google:
+`docker exec -it aranter_bridge agy` → pilih *Google OAuth* → buka link di browser laptop → tempel kode. Data login tersimpan
+di volume `agy_home`, jadi tetap ada walau container di-build ulang. Lalu isi `ANALYST_CMD` di `.env` server.
+
 **Produksi:** jalankan bridge di VPS (di belakang HTTPS, mis. `https://api.aranter.web.id`), set
 `ALLOWED_ORIGINS` ke domain kantor, lalu isi `CHAT_API_URL` di `js/config.js`. Ada rate limit per IP dan cache 10 menit per saham.
 ⚠️ Pertanyaan datang dari pengunjung publik. Jalankan CLI tanpa auto-approve tool, dan jangan beri akses ke secret

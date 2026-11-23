@@ -1,6 +1,7 @@
 # Varian untuk server dengan Tailscale Funnel (tanpa Caddy — HTTPS publik disediakan Funnel).
 #   docker compose -f docker-compose.tailscale.yml up -d --build
-#   tailscale funnel --bg --https=8443 http://127.0.0.1:8787
+#   sudo tailscale funnel --bg --https=8443 http://127.0.0.1:8787
+#   docker exec -it aranter_bridge agy        # login akun Google sekali (pilih "Google OAuth")
 # Publik: https://<mesin>.<tailnet>.ts.net:8443  (443 tetap untuk project lain)
 services:
   bridge:
@@ -12,3 +13,8 @@ services:
     env_file: .env
     ports:
       - "127.0.0.1:8787:8787"   # hanya lokal; akses publik lewat Funnel
+    volumes:
+      - agy_home:/root          # data login agy (OAuth) tetap tersimpan saat rebuild
+
+volumes:
+  agy_home:
