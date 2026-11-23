@@ -51,6 +51,13 @@ ALLOWED_ORIGINS = [o.strip() for o in os.environ.get(
     "ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080,https://aranter.web.id").split(",") if o.strip()]
 HISTORY_URL = os.environ.get("HISTORY_URL", "https://aranter.web.id/data/history.json")
 RATE_PER_MIN = int(os.environ.get("RATE_PER_MIN", "6"))
+# Batas total permintaan chat/analisa per menit dari semua pengunjung (melindungi kuota AI & server)
+GLOBAL_RATE_PER_MIN = int(os.environ.get("GLOBAL_RATE_PER_MIN", "40"))
+# Alamat yang didengarkan. Default 127.0.0.1 = hanya laptop/server ini (bukan seluruh WiFi/LAN).
+# Di dalam Docker diisi 0.0.0.0 (port Docker sendiri sudah dibatasi ke 127.0.0.1 di host).
+HOST = os.environ.get("HOST", "127.0.0.1")
+# Hanya percayai X-Forwarded-For bila bridge berada di belakang proxy tepercaya (Tailscale Funnel / Caddy)
+TRUST_PROXY = os.environ.get("TRUST_PROXY", "0") == "1"
 CACHE_MINUTES = int(os.environ.get("CACHE_MINUTES", "10"))
 NEWS_DAYS = int(os.environ.get("NEWS_DAYS", "30"))
 PROMPT_FILE = os.path.join(HERE, "prompt_template.md")
@@ -559,6 +566,14 @@ def chat(message, history):
 class Handler(BaseHTTPRequestHandler):
     server_version = "AranterAnalyst/1.0"
 
+    def _client_ip(self):
+        """IP pengunjung. X-Forwarded-For bisa dipalsukan klien, jadi hanya dipakai bila TRUST_PROXY=1
+        dan diambil entri PALING KANAN (yang ditambahkan proxy kita sendiri)."""
+        xff = self.headers.get("X-Forwarded-For", "")
+        if TRUST_PROXY and xff:
+            return xff.split(",")[-1].strip()
+        return self.client_address[0]
+
     def _cors(self):
         origin = self.headers.get("Origin")
         if origin and ("*" in ALLOWED_ORIGINS or origin in ALLOWED_ORIGINS):
@@ -573,6 +588,9 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(code)
             self._cors()
             self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
@@ -601,9 +619,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._live_push()
         if not (self.path.startswith("/api/analyze") or self.path.startswith("/api/chat")):
             return self._json(404, {"ok": False, "error": "not found"})
-        ip = self.headers.get("X-Forwarded-For", self.client_address[0]).split(",")[0].strip()
+        ip = self._client_ip()
         now = time.time()
         with _lock:
+            g = [t for t in _rate.get("*", []) if now - t < 60]
+            if len(g) >= GLOBAL_RATE_PER_MIN:
+                return self._json(429, {"ok": False, "error": "Analis sedang ramai, coba lagi sebentar."})
+            _rate["*"] = g + [now]
             hits = [t for t in _rate.get(ip, []) if now - t < 60]
             if len(hits) >= RATE_PER_MIN:
                 return self._json(429, {"ok": False, "error": "Terlalu banyak permintaan, coba lagi sebentar."})
@@ -671,4 +693,5 @@ if __name__ == "__main__":
     log(f"Analyst bridge di http://localhost:{PORT}  · engine: {'ai' if ANALYST_CMD else 'heuristik'}")
     log("origin diizinkan:", ", ".join(ALLOWED_ORIGINS))
     log("live feed bot:", "AKTIF (POST /api/live/push)" if LIVE_TOKEN else "nonaktif (LIVE_TOKEN kosong)")
-    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    log(f"mendengarkan di {HOST}:{PORT}" + ("  (hanya mesin ini)" if HOST == "127.0.0.1" else ""))
+    ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
