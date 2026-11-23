@@ -75,7 +75,9 @@ export class Chat {
 
   toggle(force) {
     const open = force ?? !$('chat').classList.contains('open');
+    const was = $('chat').classList.contains('open');
     $('chat').classList.toggle('open', open);
+    if (open !== was && this.onToggle) this.onToggle(open);
     if (open) setTimeout(() => $('chatInput').focus(), 50);
   }
 

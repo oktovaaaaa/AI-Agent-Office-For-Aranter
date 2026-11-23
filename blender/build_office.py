@@ -20,8 +20,10 @@ import os
 import random
 import sys
 
+from mathutils import Vector
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import TAU, Builder, decal, empty, export_glb, make_image, mat, reset, save_blend, tex_mat, text3d  # noqa: E402
+from common import TAU, V, Builder, decal, empty, export_glb, make_image, mat, reset, save_blend, tex_mat, text3d  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.normpath(os.path.join(HERE, "..", "assets", "office.glb"))
@@ -445,6 +447,45 @@ pot_plant(rs, -18.8, 12.6)
 rs.build()
 empty("AGENT_HOME_research", (-14.5, 0, 10.55), face=PI)
 label(7, "RISET AI · TANYA ANALIS", -14.8, 13.3, 7.5)
+
+# ---------------------------------------------------------------- peta navigasi (tabrakan pemain & jalur agen)
+# Ray-cast ke bawah dari ketinggian 2,8 m di tiap sel 0,25 m. Sel "terhalang" bila mengenai benda yang
+# puncaknya > 0,15 m (meja, kursi, kaca, rak, planter). Lampu gantung & gedung kota diabaikan.
+# Dinding luar (lebih tinggi dari 2,8 m) dibatasi lewat batas ruangan di web.
+import json  # noqa: E402
+
+import bpy  # noqa: E402
+
+NAV = os.path.normpath(os.path.join(HERE, "..", "assets", "navgrid.json"))
+CELL, X0, Z0, NW, NH = 0.25, -20.0, -14.0, 160, 112
+skip = [o for o in bpy.data.objects if o.name in ("Ceiling_Lights", "City_Skyline") or o.type != "MESH"]
+for o in skip:
+    o.hide_viewport = True
+dg = bpy.context.evaluated_depsgraph_get()
+rows = []
+for iz in range(NH):
+    z = Z0 + (iz + 0.5) * CELL
+    row = []
+    for ix in range(NW):
+        x = X0 + (ix + 0.5) * CELL
+        blocked = False
+        # pola silang 7+7 sinar (jarak ~3,6 cm) agar dinding kaca setebal 4 cm tidak lolos
+        for k in range(7):
+            off = (k - 3) * CELL / 6.5
+            for px, pz in ((x + off, z), (x, z + off)):
+                hit, loc, *_ = bpy.context.scene.ray_cast(dg, V(px, 2.8, pz), Vector((0, 0, -1)), distance=3.0)
+                if hit and loc.z > 0.15:
+                    blocked = True
+                    break
+            if blocked:
+                break
+        row.append("1" if blocked else "0")
+    rows.append("".join(row))
+for o in skip:
+    o.hide_viewport = False
+with open(NAV, "w", encoding="utf-8") as f:
+    json.dump({"x0": X0, "z0": Z0, "cell": CELL, "w": NW, "h": NH, "rows": rows}, f)
+print("navgrid:", NAV, sum(r.count("1") for r in rows), "sel terhalang dari", NW * NH)
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 save_blend(BLEND)

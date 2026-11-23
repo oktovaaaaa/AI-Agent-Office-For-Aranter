@@ -10,6 +10,9 @@ import { FX } from './fx.js';
 import { Replay } from './sim.js';
 import { UI } from './ui.js';
 import { Chat } from './chat.js';
+import { NavGrid } from './nav.js';
+import { Player } from './player.js';
+import { CameraRig } from './camera.js';
 
 // ---------- Renderer & scene ----------
 const app = document.getElementById('app');
@@ -78,6 +81,74 @@ const agents = createAgents(scene, office, agentsGltf, Math.min(CONFIG.SCANNER_W
 const fx = new FX(scene);
 let history = null;
 
+// ---------- Mode jalan: pemain, navigasi, kamera ----------
+const nav = await NavGrid.load(`assets/navgrid.json?v=${window.ARANTER_BUILD || ''}`);
+const player = new Player(scene, agentsGltf, nav);
+const camObstacles = [];
+officeGltf.scene.traverse((o) => {
+  if (!o.isMesh) return;
+  const n = (o.material?.name || '') + ' ' + (o.parent?.name || '') + ' ' + o.name;
+  if (/Glass|LightBar|City|Ceiling_Lights|LogoDecal|Carpet|Floor/i.test(n)) return; // kamera boleh menembus kaca/lampu
+  camObstacles.push(o);
+});
+const rig = new CameraRig(camera, controls, renderer.domElement, camObstacles);
+let spawned = false;
+
+function setCameraMode(mode) {
+  if (mode !== 'drone' && !spawned) {
+    const s = nav ? nav.nearestFree(0, 12.6, 0.3) : { x: 0, z: 12.6 };
+    player.pos.set(s.x, 0, s.z);
+    player.agent.root.rotation.y = Math.PI;
+    rig.yaw = 0;
+    spawned = true;
+  }
+  if (mode !== 'drone') { focusTarget = null; ui.closePanel(); }
+  rig.setMode(mode, player);
+  player.setActive(mode !== 'drone', mode === 'first');
+  ui.setCameraMode(mode);
+  if (mode === 'drone') researchReturn();
+  else if (chatOpen) researchVisit();
+  if (mode !== 'drone') ui.toast(mode === 'first'
+    ? 'Mode Mata · WASD/panah untuk berjalan · drag untuk melihat sekeliling · V ganti kamera'
+    : 'Mode Jalan · WASD/panah · Shift lari · drag putar kamera · scroll zoom · V ganti kamera');
+}
+
+// Analis Riset AI menghampiri pemain saat chat dibuka (mode Jalan/Mata)
+let chatOpen = false;
+let visitCheck = 0;
+function researchVisit() {
+  const r = agents.research;
+  const p = player.pos;
+  // titik berdiri: di depan pemain (arah kamera); kalau terhalang coba menyamping, harus "terlihat" dari pemain
+  const base = rig.yaw;
+  let target = null;
+  for (const da of [0, 0.5, -0.5, 1.0, -1.0, 1.6, -1.6, 2.4, -2.4, Math.PI]) {
+    for (const dist of [1.5, 1.2, 2.0]) {
+      const c = { x: p.x - Math.sin(base + da) * dist, z: p.z - Math.cos(base + da) * dist };
+      if (!nav || (nav.free(c.x, c.z, 0.3) && nav.lineFree(p, c, 0.2))) { target = c; break; }
+    }
+    if (target) break;
+  }
+  if (!target) target = nav ? nav.nearestFree(p.x, p.z + 1.2, 0.3) : { x: p.x, z: p.z + 1.2 };
+  const path = nav ? nav.path(r.root.position, target, 0.3) : [target];
+  r.visiting = true;
+  r.setWorking(false);
+  if (Math.hypot(r.root.position.x - target.x, r.root.position.z - target.z) > 0.5) r.say('Sebentar, aku ke sana…', 2.5);
+  r.walkTo(path, () => {
+    r.root.rotation.y = Math.atan2(player.pos.x - r.root.position.x, player.pos.z - r.root.position.z);
+    r.say('Halo! Mau tanya berita atau analisa saham apa? 🙂', 4);
+  });
+}
+function researchReturn() {
+  const r = agents.research;
+  if (!r.visiting) return;
+  const path = nav ? nav.path(r.root.position, r.home, 0.3) : [r.home];
+  r.walkTo([...path.slice(0, -1), { x: r.home.x, z: r.home.z }], () => {
+    r.root.rotation.y = r.home.face;
+    r.visiting = false;
+  });
+}
+
 const ui = new UI({
   onTogglePlay: () => replay.togglePause(),
   onSpeed: (s) => { replay.speed = s; },
@@ -93,10 +164,22 @@ const ui = new UI({
     if (!on && replay.mode === 'live') { const ds = Object.keys(history.daily_scans).sort(); playDate(ds[ds.length - 1]); }
   },
   onFloorLabels: (on) => { office.floorLabels.visible = on; },
+  onCameraMode: (m) => setCameraMode(m),
+  onView: (v) => { if (rig.mode !== 'drone') setCameraMode('drone'); rig.view(v); },
 });
 let liveWanted = true; // otomatis ikut LIVE saat bot berjalan
 const replay = new Replay({ office, agents, fx, ui, onLights: (on) => { lightTarget = on ? 1 : 0; } });
 const chat = new Chat({ getHistory: () => history, research: agents.research, screen: office.researchScreen });
+chat.onToggle = (open) => {
+  chatOpen = open;
+  if (rig.mode === 'drone') return;
+  if (open) researchVisit(); else researchReturn();
+};
+// V = ganti mode kamera (Drone → Jalan → Mata)
+addEventListener('keydown', (e) => {
+  if (e.code !== 'KeyV' || ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName)) return;
+  setCameraMode({ drone: 'third', third: 'first', first: 'drone' }[rig.mode]);
+});
 
 function playDate(k, manual = false) {
   if (!history?.daily_scans?.[k]) return;
@@ -129,11 +212,11 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   if (p.type === 'research' || (p.type === 'agent' && p.agent.id === 'research')) {
     chat.toggle(true);
     agents.research.say('Mau analisa saham apa? 🙂', 3);
-    focusTarget = agents.research.root.position.clone().setY(1);
-  } else if (p.type === 'agent') {
+    if (rig.mode === 'drone') focusTarget = agents.research.root.position.clone().setY(1);
+  } else if (p.type === 'agent' && p.agent.id !== 'player') {
     selectedAgent = p.agent;
     ui.showAgent(p.agent);
-    focusTarget = p.agent.root.position.clone().setY(1);
+    if (rig.mode === 'drone') focusTarget = p.agent.root.position.clone().setY(1);
   } else if (p.type === 'monitor') {
     const st = office.desks[p.index]?.stock;
     if (st) ui.showStock(st);
@@ -167,7 +250,15 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
   replay.update(dt);
   const wdt = replay.worldDt(dt);
-  agents.list.forEach((a) => a.update(wdt));
+  // agen riset yang sedang menghampiri pemain memakai waktu nyata (tetap jalan walau replay dijeda)
+  agents.list.forEach((a) => a.update(a.visiting ? dt : wdt));
+  player.update(dt, rig.yaw);
+  if (chatOpen && rig.mode !== 'drone' && (visitCheck += dt) > 1.5) {
+    visitCheck = 0;
+    const r = agents.research;
+    const far = Math.hypot(r.root.position.x - player.pos.x, r.root.position.z - player.pos.z) > 3.6;
+    if (far && r.state !== 'walk') researchVisit(); // pemain pergi: agen menyusul
+  }
   fx.update(wdt);
 
   lightLevel += (lightTarget - lightLevel) * Math.min(1, dt * 2);
@@ -184,13 +275,13 @@ renderer.setAnimationLoop(() => {
     const el = document.getElementById('agentActivity');
     if (el && el.textContent !== selectedAgent.activity) el.textContent = selectedAgent.activity;
   }
-  if (focusTarget) {
+  if (focusTarget && rig.mode === 'drone') {
     const delta = focusTarget.clone().sub(controls.target).multiplyScalar(Math.min(1, dt * 4));
     controls.target.add(delta);
     camera.position.add(delta);
     if (delta.lengthSq() < 1e-5) focusTarget = null;
   }
-  controls.update();
+  rig.update(dt, player);
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 });
@@ -208,7 +299,7 @@ renderer.setAnimationLoop(() => {
   ui.setDates(json.daily_scans, latest);
   ui.hideLoading();
   playDate(latest);
-  window.__aranter = { replay, agents, office, history, signalsOf, cam: camera };
+  window.__aranter = { replay, agents, office, history, signalsOf, cam: camera, rig, player, nav, setCameraMode };
   window.__chat = chat; // debug helper
 
   // ---------- Data baru otomatis ----------

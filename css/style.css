@@ -164,3 +164,15 @@ body.hide-tags .nametag { display: none; }
   .log { left: 8px; right: 8px; width: auto; bottom: 60px; max-height: 22vh; }
   .bubble { font-size: 9px; }
 }
+
+/* ---------- kamera & mode jalan ---------- */
+.views { display: flex; flex-wrap: wrap; gap: 5px; }
+.views button { font-size: 12px; padding: 4px 10px; background: var(--soft); border: 0; }
+.views button:hover { background: #e4e7eb; }
+#viewRow.dim .views { opacity: .55; }
+.seg button { white-space: nowrap; }
+.toast { position: fixed; top: 70px; left: 50%; transform: translate(-50%, -6px); z-index: 7; background: rgba(31,35,40,.86); color: #fff; font-size: 12px; padding: 8px 14px; border-radius: 999px; opacity: 0; pointer-events: none; transition: .25s ease; white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.joy { display: none; position: fixed; left: 22px; bottom: 76px; width: 116px; height: 116px; border-radius: 50%; background: rgba(255,255,255,.35); border: 1px solid rgba(31,35,40,.12); backdrop-filter: blur(6px); z-index: 6; touch-action: none; }
+.joy-knob { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; border-radius: 50%; background: rgba(31,35,40,.7); transform: translate(-50%, -50%); }
+@media (pointer: coarse) { body.walking .joy { display: block; } }

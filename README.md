@@ -106,6 +106,16 @@ Kode saham yang juga kata umum (PADA = "pada") hanya dikenali kalau ditulis HURU
 ⚠️ Pertanyaan datang dari pengunjung publik. Jalankan CLI tanpa auto-approve tool, dan jangan beri akses ke secret
 (token Fonnte, session TradingView).
 
+## Mode kamera: jadi karakter di kantor
+
+Pengaturan (⚙) → **Kamera**: **Drone** (orbit bebas + preset Isometrik/Atas/Depan/Scanner/Lounge VVIP/Analis/Riset AI),
+**Jalan** (orang ke-3), **Mata** (orang pertama). Tombol **V** berganti mode.
+- Jalan: **WASD/panah**, **Shift** lari, **drag** putar kamera, **scroll** zoom. Layar sentuh: joystick kiri bawah.
+- Tabrakan memakai `assets/navgrid.json` (sel 0,25 m) yang dibuat `blender/build_office.py` lewat ray-cast,
+  jadi pemain tidak menembus meja, kaca, atau rak, dan kamera orang ke-3 tidak menembus dinding.
+- Saat mode Jalan/Mata dan chat dibuka, **Analis Riset AI** berjalan menghampiri (jalur A* mengitari furnitur), berdiri
+  di samping pemain, dan menyusul bila pemain pindah. Chat ditutup → ia kembali ke mejanya.
+
 ## Kontrol
 - Klik **agen** untuk melihat peran, fungsi kode, dan aktivitasnya
 - Klik **monitor** scanner untuk melihat detail saham yang sedang/selesai di-scan

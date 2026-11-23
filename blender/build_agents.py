@@ -45,6 +45,8 @@ AGENTS = {
     "tech": ("#475569", "#1f2937", 1, "#2b1d14", "spiky", ["headset", "vest"]),
     "archivist": ("#a16207", "#44403c", 4, "#9ca3af", "bald", ["glasses", "cardigan"]),
     "research": ("#0f172a", "#1e293b", 2, "#111111", "long", ["glasses", "hoodie_ai"]),
+    # karakter yang dimainkan pengunjung (mode Jalan / Mata)
+    "player": ("#f8fafc", "#1f2937", 0, "#2b1d14", "short", ["lanyard"]),
 }
 
 M_SHOE = mat("Shoe", "#1b1b1b", 0.5)

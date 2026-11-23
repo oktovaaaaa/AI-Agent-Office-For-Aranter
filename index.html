@@ -8,21 +8,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
-  <link rel="stylesheet" href="css/style.css?v=20261123c" />
-  <script>window.ARANTER_BUILD = "20261123c";</script>
+  <link rel="stylesheet" href="css/style.css?v=20261123e" />
+  <script>window.ARANTER_BUILD = "20261123e";</script>
   <script type="importmap">
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
-        "./js/agents.js": "./js/agents.js?v=20261123c",
-        "./js/chat.js": "./js/chat.js?v=20261123c",
-        "./js/config.js": "./js/config.js?v=20261123c",
-        "./js/data.js": "./js/data.js?v=20261123c",
-        "./js/fx.js": "./js/fx.js?v=20261123c",
-        "./js/office.js": "./js/office.js?v=20261123c",
-        "./js/sim.js": "./js/sim.js?v=20261123c",
-        "./js/ui.js": "./js/ui.js?v=20261123c"
+        "./js/agents.js": "./js/agents.js?v=20261123e",
+        "./js/chat.js": "./js/chat.js?v=20261123e",
+        "./js/config.js": "./js/config.js?v=20261123e",
+        "./js/data.js": "./js/data.js?v=20261123e",
+        "./js/fx.js": "./js/fx.js?v=20261123e",
+        "./js/office.js": "./js/office.js?v=20261123e",
+        "./js/sim.js": "./js/sim.js?v=20261123e",
+        "./js/ui.js": "./js/ui.js?v=20261123e",
+        "./js/nav.js": "./js/nav.js?v=20261123e",
+        "./js/player.js": "./js/player.js?v=20261123e",
+        "./js/camera.js": "./js/camera.js?v=20261123e"
       }
     }
   </script>
@@ -32,7 +35,7 @@
 
   <!-- Kiri atas: identitas + status -->
   <header class="brand-chip glass">
-    <img class="logo-img" src="assets/aranter-logo.png?v=20261123c" alt="" width="26" height="26" />
+    <img class="logo-img" src="assets/aranter-logo.png?v=20261123e" alt="" width="26" height="26" />
     <span class="brand-name">Aranter</span>
     <button id="liveBadge" class="live" title="Status data">Replay</button>
   </header>
@@ -50,6 +53,21 @@
   <!-- Pengaturan (semua kontrol di sini) -->
   <section id="settings" class="settings glass" aria-label="Pengaturan">
     <div class="set-h">Pengaturan</div>
+    <div class="set-row">
+      <span>Kamera</span>
+      <div class="seg">
+        <button data-cam="drone" class="active" title="Terbang bebas di atas kantor">Drone</button>
+        <button data-cam="third" title="Jadi karakter, kamera di belakang">Jalan</button>
+        <button data-cam="first" title="Lihat dari mata karakter">Mata</button>
+      </div>
+    </div>
+    <div id="viewRow" class="set-row col">
+      <span>Sudut pandang</span>
+      <div class="views">
+        <button data-view="iso">Isometrik</button><button data-view="top">Atas</button><button data-view="front">Depan</button>
+        <button data-view="scanner">Scanner</button><button data-view="vip">Lounge VVIP</button><button data-view="analyst">Analis</button><button data-view="research">Riset AI</button>
+      </div>
+    </div>
     <label class="set-row col">
       <span>Data scan</span>
       <select id="dateSelect" aria-label="Pilih tanggal scan"></select>
@@ -88,6 +106,9 @@
     <ul id="logList"></ul>
   </section>
 
+  <div id="toast" class="toast" role="status"></div>
+  <div id="joy" class="joy" aria-label="Joystick"><div id="joyKnob" class="joy-knob"></div></div>
+
   <aside id="panel" class="panel glass">
     <button id="panelClose" class="x" aria-label="Tutup">✕</button>
     <div id="panelBody"></div>
@@ -95,7 +116,7 @@
 
   <section id="chat" class="chat glass" aria-label="Chat Analis Riset AI">
     <div class="chat-h">
-      <img class="logo-img sm" src="assets/aranter-logo.png?v=20261123c" alt="" width="22" height="22" />
+      <img class="logo-img sm" src="assets/aranter-logo.png?v=20261123e" alt="" width="22" height="22" />
       <div><b>Analis Riset AI</b><div id="chatEngine" class="src">…</div></div>
       <button id="chatClose" class="x" aria-label="Tutup chat">✕</button>
     </div>
@@ -115,7 +136,7 @@
 
   <div id="loading">
     <div class="ld-card">
-      <img class="logo-img big" src="assets/aranter-logo.png?v=20261123c" alt="Aranter" width="72" height="72" />
+      <img class="logo-img big" src="assets/aranter-logo.png?v=20261123e" alt="Aranter" width="72" height="72" />
       <div class="ld-title">Aranter</div>
       <div class="ld-bar"><i id="loadBar"></i></div>
       <div id="loadText" class="ld-text">Memuat…</div>
@@ -131,6 +152,6 @@
         '<code>python -m http.server 8080</code> lalu buka <b>http://localhost:8080</b>';
     }
   </script>
-  <script type="module" src="js/main.js?v=20261123c"></script>
+  <script type="module" src="js/main.js?v=20261123e"></script>
 </body>
 </html>

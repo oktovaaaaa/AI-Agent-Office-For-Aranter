@@ -134,6 +134,7 @@ export class Agent {
   }
 
   resetPose() {
+    if (this.visiting) { this.stats = {}; return; } // sedang menghampiri pemain: jangan diteleport
     this.path = [];
     this.onArrive = null;
     this.root.position.set(this.home.x, 0, this.home.z);
@@ -155,6 +156,19 @@ export class Agent {
     }
     const p = this.parts;
     const k = Math.min(1, dt * 10);
+    if (this.manual) { // karakter pemain: posisi digerakkan input, di sini hanya animasi
+      const sp = this.manualSpeed || 0;
+      if (sp > 0.05) {
+        const s = Math.sin(this.phase * (6 + sp * 1.7)) * Math.min(0.75, 0.3 + sp * 0.09);
+        p.legL.rotation.x = s; p.legR.rotation.x = -s;
+        p.armL.rotation.x = -s * 0.8; p.armR.rotation.x = s * 0.8;
+        p.body.position.y = Math.abs(s) * 0.07;
+      } else {
+        for (const l of [p.legL, p.legR, p.armL, p.armR]) l.rotation.x += (0 - l.rotation.x) * k;
+        p.body.position.y = Math.sin(this.phase * 2) * 0.012;
+      }
+      return;
+    }
     if (this.state === 'walk' && this.path.length) {
       const pos = this.root.position;
       const tgt = this.path[0];

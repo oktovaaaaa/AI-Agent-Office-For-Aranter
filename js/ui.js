@@ -26,6 +26,10 @@ export class UI {
     $('optFloor').onchange = (e) => handlers.onFloorLabels && handlers.onFloorLabels(e.target.checked);
     $('optLog').onchange = (e) => $('logBox').classList.toggle('hidden', !e.target.checked);
     $('optLive').onchange = (e) => handlers.onLiveToggle && handlers.onLiveToggle(e.target.checked);
+    document.querySelectorAll('[data-cam]').forEach((b) => { b.onclick = () => handlers.onCameraMode(b.dataset.cam); });
+    document.querySelectorAll('[data-view]').forEach((b) => {
+      b.onclick = () => { handlers.onView(b.dataset.view); settings.classList.remove('open'); };
+    });
     $('logToggle').onclick = () => {
       const c = $('logBox').classList.toggle('collapsed');
       $('logToggle').setAttribute('aria-expanded', String(!c));
@@ -39,6 +43,19 @@ export class UI {
       if (el) handlers.onStockSymbol(el.dataset.sym);
     };
     this.logStocks = [];
+  }
+
+  setCameraMode(mode) {
+    document.querySelectorAll('[data-cam]').forEach((b) => b.classList.toggle('active', b.dataset.cam === mode));
+    $('viewRow').classList.toggle('dim', mode !== 'drone');
+  }
+
+  toast(text, ms = 4500) {
+    const t = $('toast');
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(this._toastT);
+    this._toastT = setTimeout(() => t.classList.remove('show'), ms);
   }
 
   setLoading(p, text) {
