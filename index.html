@@ -6,8 +6,8 @@
   <title>Aranter — Agent Office</title>
   <meta name="description" content="Kantor 3D tempat agent Aranter bekerja: screener, scanner RallyGood, analis SMC/DonAlt/MACD, dan kurir WhatsApp." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2322c55e%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 font-family=%22sans-serif%22 font-weight=%22800%22 text-anchor=%22middle%22 fill=%22%2304111d%22%3EA%3C/text%3E%3C/svg%3E" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="stylesheet" href="css/style.css" />
   <script type="importmap">
     {
@@ -18,40 +18,64 @@
     }
   </script>
 </head>
-<body>
+<body class="hide-tags">
   <div id="app"></div>
 
-  <header class="topbar glass">
-    <div class="brand">
-      <div class="logo">A</div>
-      <div>
-        <div class="title">Aranter <span class="sub">Agent Office</span> <span id="liveBadge" class="live">○ REPLAY</span></div>
-        <div id="srcInfo" class="src">menghubungkan…</div>
-      </div>
-    </div>
-    <div class="controls">
-      <select id="dateSelect" aria-label="Pilih tanggal scan"></select>
-      <button id="btnPlay">⏸ Jeda</button>
-      <div class="seg">
-        <button data-speed="1" class="active">1x</button>
-        <button data-speed="3">3x</button>
-        <button data-speed="10">10x</button>
-      </div>
-      <button id="btnLabels" class="active" title="Tampilkan nama agen">🏷️</button>
-    </div>
+  <!-- Kiri atas: identitas + status -->
+  <header class="brand-chip glass">
+    <img class="logo-img" src="assets/aranter-logo.png" alt="" />
+    <span class="brand-name">Aranter</span>
+    <button id="liveBadge" class="live" title="Status data">Replay</button>
   </header>
 
+  <!-- Kanan atas: dua tombol ikon -->
+  <nav class="fab-row">
+    <button id="settingsBtn" class="fab glass" aria-label="Pengaturan" title="Pengaturan">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+    <button id="chatToggle" class="fab glass" aria-label="Tanya Analis" title="Tanya Analis Riset AI">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+  </nav>
+
+  <!-- Pengaturan (semua kontrol di sini) -->
+  <section id="settings" class="settings glass" aria-label="Pengaturan">
+    <div class="set-h">Pengaturan</div>
+    <label class="set-row col">
+      <span>Data scan</span>
+      <select id="dateSelect" aria-label="Pilih tanggal scan"></select>
+    </label>
+    <div class="set-row">
+      <span>Pemutaran</span>
+      <div class="inline">
+        <button id="btnPlay" class="pill">Jeda</button>
+        <div class="seg">
+          <button data-speed="1" class="active">1x</button>
+          <button data-speed="3">3x</button>
+          <button data-speed="10">10x</button>
+        </div>
+      </div>
+    </div>
+    <label class="set-row"><span>Nama agen</span><input type="checkbox" id="btnLabels" class="switch" /></label>
+    <label class="set-row"><span>Label ruangan</span><input type="checkbox" id="optFloor" class="switch" /></label>
+    <label class="set-row"><span>Aktivitas kantor</span><input type="checkbox" id="optLog" class="switch" /></label>
+    <label class="set-row"><span>Ikuti LIVE otomatis</span><input type="checkbox" id="optLive" class="switch" checked /></label>
+    <div id="srcInfo" class="set-foot">menghubungkan…</div>
+  </section>
+
+  <!-- Statistik: satu baris tipis -->
   <section class="stats glass">
-    <div><span>Screener</span><b id="stTotal">0</b></div>
-    <div><span>Diproses</span><b id="stProg">0/0</b></div>
-    <div><span>VVIP 3 TF</span><b id="stVip" class="g">0</b></div>
-    <div><span>Radar 2 TF</span><b id="stRadar" class="y">0</b></div>
-    <div><span>Alert WA</span><b id="stAlert">0</b></div>
+    <div><b id="stTotal">0</b><span>saham</span></div>
+    <div><b id="stProg">0/0</b><span>diproses</span></div>
+    <div><b id="stVip" class="g">0</b><span>VVIP</span></div>
+    <div><b id="stRadar" class="y">0</b><span>radar</span></div>
+    <div><b id="stAlert">0</b><span>alert</span></div>
     <div class="prog"><i id="progFill"></i></div>
   </section>
 
-  <section id="logBox" class="log glass collapsed">
-    <button id="logToggle" class="log-h" aria-expanded="false">Aktivitas Kantor <span class="chev">▸</span></button>
+  <!-- Aktivitas (disembunyikan, nyalakan dari Pengaturan) -->
+  <section id="logBox" class="log glass hidden">
+    <button id="logToggle" class="log-h" aria-expanded="true">Aktivitas <span class="chev">▸</span></button>
     <ul id="logList"></ul>
   </section>
 
@@ -60,31 +84,30 @@
     <div id="panelBody"></div>
   </aside>
 
-  <button id="chatToggle" class="chat-toggle" title="Tanya Analis Riset AI">💬 Tanya Analis</button>
   <section id="chat" class="chat glass" aria-label="Chat Analis Riset AI">
     <div class="chat-h">
+      <img class="logo-img sm" src="assets/aranter-logo.png" alt="" />
       <div><b>Analis Riset AI</b><div id="chatEngine" class="src">…</div></div>
       <button id="chatClose" class="x" aria-label="Tutup chat">✕</button>
     </div>
     <div id="chatLog" class="chat-log"></div>
     <div id="chatChips" class="chips quick">
       <button class="chip ask" data-q="VVIP hari ini">VVIP hari ini</button>
-      <button class="chip ask" data-q="analisa dot green PADA">Dot green PADA</button>
-      <button class="chip ask" data-q="berita PADA good news atau bad news?">Berita PADA</button>
+      <button class="chip ask" data-q="berapa saham di screener?">Jumlah saham</button>
+      <button class="chip ask" data-q="daftar radar 2 dot">Radar</button>
     </div>
     <form id="chatForm" class="chat-form">
-      <input id="chatInput" autocomplete="off" maxlength="1200" placeholder="mis. analisa PADA, ada berita apa?" />
-      <button id="chatSend" type="submit">Kirim</button>
+      <input id="chatInput" autocomplete="off" maxlength="1200" placeholder="Tanya soal saham…" />
+      <button id="chatSend" type="submit" aria-label="Kirim">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+      </button>
     </form>
   </section>
 
-  <div class="hint">Klik agen, monitor, papan VVIP, whiteboard, kabinet arsip · klik Analis Riset AI untuk chat</div>
-
   <div id="loading">
     <div class="ld-card">
-      <div class="logo big">A</div>
+      <img class="logo-img big" src="assets/aranter-logo.png" alt="Aranter" />
       <div class="ld-title">Aranter</div>
-      <div class="ld-sub">Agent Office</div>
       <div class="ld-bar"><i id="loadBar"></i></div>
       <div id="loadText" class="ld-text">Memuat…</div>
     </div>

@@ -164,6 +164,7 @@ export function buildOffice(scene, gltf) {
       if (m?.name === 'Glass') { m.transparent = true; m.opacity = 0.16; m.depthWrite = false; o.castShadow = false; }
       if (m?.name === 'Frosted') { m.transparent = true; m.opacity = 0.55; m.depthWrite = false; o.castShadow = false; }
       if (m?.name === 'Water') { m.transparent = true; m.opacity = 0.6; }
+      if (m?.name === 'LogoDecal') { m.transparent = false; m.alphaTest = 0.5; o.castShadow = false; }
       if (/^(Floor|Carpet|City|LightBar)/.test(m?.name || '')) o.castShadow = false;
       if (/^City/.test(o.name) || /^City/.test(o.parent?.name || '')) o.receiveShadow = false;
     }
@@ -191,7 +192,9 @@ export function buildOffice(scene, gltf) {
   }
 
   // Tulisan zona di lantai
-  for (const o of byPrefix('LABEL_')) floorLabel(scene, o.userData?.text || '', wpos(o), o.userData?.w || 6);
+  const floorLabels = new THREE.Group(); // tulisan zona di lantai (bisa dimatikan dari Pengaturan)
+  scene.add(floorLabels);
+  for (const o of byPrefix('LABEL_')) floorLabel(floorLabels, o.userData?.text || '', wpos(o), o.userData?.w || 6);
 
   // Meja scanner
   const desks = [];
@@ -271,7 +274,7 @@ export function buildOffice(scene, gltf) {
   }
 
   return {
-    root, pickables, desks, screens, homes, leds, vipBoard, whiteboard,
+    root, pickables, desks, screens, homes, leds, vipBoard, whiteboard, floorLabels,
     sign: screens.sign, hunterScreen: screens.hunter, courierScreen: screens.courier, researchScreen: research,
     windowPoint: point('window', new THREE.Vector3(-1, 2.4, -13.8)),
     analystTable: point('analyst_table', new THREE.Vector3(15.6, 0.9, 2.2)),

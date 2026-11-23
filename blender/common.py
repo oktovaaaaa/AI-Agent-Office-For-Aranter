@@ -232,6 +232,46 @@ def text3d(name, body, size, depth, pos, yaw, material, font_path=None, spacing=
     return ob
 
 
+def decal(name, img_path, w, h, pos, yaw=0.0, mat_name="LogoDecal"):
+    """Bidang gambar transparan (mis. logo) berdiri tegak, menghadap arah yaw (0 = +z web)."""
+    m = bpy.data.materials.get(mat_name)
+    if m is None:
+        m = bpy.data.materials.new(mat_name)
+        try:
+            m.use_nodes = True
+        except Exception:
+            pass
+        N, L = m.node_tree.nodes, m.node_tree.links
+        b = N.get("Principled BSDF")
+        t = N.new("ShaderNodeTexImage")
+        t.image = bpy.data.images.load(img_path, check_existing=True)
+        L.new(t.outputs["Color"], b.inputs["Base Color"])
+        L.new(t.outputs["Alpha"], b.inputs["Alpha"])
+        b.inputs["Roughness"].default_value = 0.5
+        for attr, val in (("surface_render_method", "DITHERED"), ("blend_method", "CLIP")):
+            try:
+                setattr(m, attr, val)
+            except Exception:
+                pass
+        m.use_backface_culling = True
+    bm = bmesh.new()
+    uvl = bm.loops.layers.uv.verify()
+    hw, hh = w / 2, h / 2
+    vs = [bm.verts.new(V(x, y, 0)) for x, y in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))]
+    f = bm.faces.new(vs)
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))):
+        lp[uvl].uv = uv
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.append(m)
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(ob)
+    ob.location = V(*pos)
+    ob.rotation_euler = (0, 0, yaw)
+    return ob
+
+
 def empty(name, pos=(0, 0, 0), parent=None, **extras):
     """Titik penanda (anchor). extras -> userData di Three.js (butuh export_extras=True)."""
     ob = bpy.data.objects.new(name, None)

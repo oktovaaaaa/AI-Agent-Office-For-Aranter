@@ -21,7 +21,7 @@ import random
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import TAU, Builder, empty, export_glb, make_image, mat, reset, save_blend, tex_mat, text3d  # noqa: E402
+from common import TAU, Builder, decal, empty, export_glb, make_image, mat, reset, save_blend, tex_mat, text3d  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.normpath(os.path.join(HERE, "..", "assets", "office.glb"))
@@ -235,10 +235,6 @@ for i in range(26):
     city.box(m, (w, h, d), (x, h / 2 - 9, z))
     for j in range(int(h / 1.4)):
         city.box(M["cityWin"], (w * 0.86, 0.35, 0.02), (x, j * 1.4 - 8.2, z + d / 2 + 0.01))
-for i in range(8):
-    w, d, h = rnd.uniform(3, 5), rnd.uniform(3, 5), rnd.uniform(5, 13)
-    x, z = rnd.uniform(-48, -34), -12 + i * 3.4
-    city.box(M[rnd.choice(("cityA", "cityB", "cityC"))], (w, h, d), (x, h / 2 - 9, z))
 city.build()
 
 # lampu linear gantung di atas area kerja
@@ -272,15 +268,15 @@ logo_wall = Builder("Logo_Wall_Panel")
 for k in range(17):  # dinding bilah kayu oak
     logo_wall.box(M["oak"], (0.2, 2.6, 0.1), (-7.6 + k * 0.2, 1.3, 9.95), bevel=0.01)
 logo_wall.box(M["white"], (3.5, 2.6, 0.08), (-6, 1.3, 9.86))
-logo_wall.cyl(M["logoGreen"], 0.09, 0.09, 0.04, (-4.05, 2.05, 10.04), seg=20, rot=(PI / 2, 0, 0))
 logo_wall.build()
-text3d("Logo_Wall_Front", "ARANTER", 0.55, 0.05, (-6.15, 1.82, 10.0), 0.0, M["logo"], FONT, 1.12)
-text3d("Logo_Wall_Front_Sub", "AGENT OFFICE", 0.17, 0.02, (-6.0, 1.45, 10.0), 0.0, M["logoGreen"], FONT, 1.9)
+LOGO = os.path.join(TEX, "aranter_logo.png")  # banteng hijau Aranter (dari repo bot docs/Aranter.png)
+decal("Logo_Bull_Reception", LOGO, 0.95, 0.95, (-6, 1.95, 10.015), 0.0)
+text3d("Logo_Wall_Front", "ARANTER", 0.4, 0.04, (-6.0, 1.12, 10.0), 0.0, M["logo"], FONT, 1.15)
 empty("AGENT_HOME_guard", (-6, 0, 11.35), face=0.0)
 
 # logo besar di dinding oak kanan
-text3d("Logo_Wall", "ARANTER", 0.95, 0.06, (19.88, 2.25, 8.6), -PI / 2, M["logo"], FONT, 1.2)
-text3d("Logo_Wall_Sub", "AGENT  OFFICE", 0.26, 0.03, (19.9, 1.75, 8.6), -PI / 2, M["logoGreen"], FONT, 1.6)
+decal("Logo_Bull_Wall", LOGO, 1.7, 1.7, (19.92, 2.25, 6.4), -PI / 2)
+text3d("Logo_Wall", "ARANTER", 0.75, 0.06, (19.88, 1.95, 8.8), -PI / 2, M["logo"], FONT, 1.15)
 
 # ---------------------------------------------------------------- hunter
 hz = Builder("Zone_Hunter")

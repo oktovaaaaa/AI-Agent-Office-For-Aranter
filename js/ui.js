@@ -16,10 +16,16 @@ export class UI {
     });
     $('panelClose').onclick = () => this.closePanel();
     $('liveBadge').onclick = () => handlers.onGoLive && handlers.onGoLive();
-    $('btnLabels').onclick = () => {
-      document.body.classList.toggle('hide-tags');
-      $('btnLabels').classList.toggle('active', !document.body.classList.contains('hide-tags'));
-    };
+    // ---- Pengaturan (semua kontrol berkumpul di sini) ----
+    const settings = $('settings');
+    $('settingsBtn').onclick = (e) => { e.stopPropagation(); settings.classList.toggle('open'); };
+    document.addEventListener('pointerdown', (e) => {
+      if (settings.classList.contains('open') && !settings.contains(e.target) && !$('settingsBtn').contains(e.target)) settings.classList.remove('open');
+    });
+    $('btnLabels').onchange = (e) => document.body.classList.toggle('hide-tags', !e.target.checked);
+    $('optFloor').onchange = (e) => handlers.onFloorLabels && handlers.onFloorLabels(e.target.checked);
+    $('optLog').onchange = (e) => $('logBox').classList.toggle('hidden', !e.target.checked);
+    $('optLive').onchange = (e) => handlers.onLiveToggle && handlers.onLiveToggle(e.target.checked);
     $('logToggle').onclick = () => {
       const c = $('logBox').classList.toggle('collapsed');
       $('logToggle').setAttribute('aria-expanded', String(!c));
@@ -43,7 +49,7 @@ export class UI {
 
   setSource(source, lastUpdated) {
     const host = source === 'demo' ? 'DATA DEMO (offline)' : new URL(source, location.href).host;
-    $('srcInfo').textContent = `sumber: ${host} · update ${lastUpdated || '-'}`;
+    $('srcInfo').textContent = `Sumber ${host} · update ${lastUpdated || '-'}`;
     $('srcInfo').classList.toggle('warn', source === 'demo');
   }
 
@@ -58,8 +64,8 @@ export class UI {
 
   setPlayState(state) {
     $('btnPlay').disabled = state === 'live';
-    if (state === 'live') { $('btnPlay').textContent = '● LIVE'; return; }
-    $('btnPlay').textContent = state === 'playing' ? '⏸ Jeda' : state === 'paused' ? '▶ Lanjut' : '⟲ Putar ulang';
+    if (state === 'live') { $('btnPlay').textContent = 'LIVE'; return; }
+    $('btnPlay').textContent = state === 'playing' ? 'Jeda' : state === 'paused' ? 'Lanjut' : 'Ulangi';
   }
 
   setStats({ total, processed, vip, radar, alerts }) {
@@ -72,9 +78,11 @@ export class UI {
   }
 
   setLive(on, text) {
-    $('liveBadge').classList.toggle('on', on);
-    $('liveBadge').textContent = on ? `● LIVE ${text || ''}` : (this.liveAvailable ? '● LIVE tersedia (klik)' : '○ REPLAY');
-    $('liveBadge').classList.toggle('avail', !on && Boolean(this.liveAvailable));
+    const b = $('liveBadge');
+    b.classList.toggle('on', on);
+    b.classList.toggle('avail', !on && Boolean(this.liveAvailable));
+    b.textContent = on ? 'LIVE' : (this.liveAvailable ? 'LIVE ›' : 'Replay');
+    b.title = on ? `Data realtime dari bot · ${text || ''}` : (this.liveAvailable ? 'Bot sedang berjalan, klik untuk ikut LIVE' : 'Memutar ulang scan tersimpan');
   }
 
   resetLog() { $('logList').innerHTML = ''; this.logStocks = []; }

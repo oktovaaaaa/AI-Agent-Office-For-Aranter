@@ -73,6 +73,7 @@ const [officeGltf, agentsGltf] = await Promise.all([
   gltfLoader.loadAsync('assets/agents.glb').catch((e) => { console.warn('agents.glb gagal, pakai karakter cadangan', e); return null; }),
 ]);
 const office = buildOffice(scene, officeGltf);
+office.floorLabels.visible = false;
 const agents = createAgents(scene, office, agentsGltf, Math.min(CONFIG.SCANNER_WORKERS, office.desks.length));
 const fx = new FX(scene);
 let history = null;
@@ -86,7 +87,12 @@ const ui = new UI({
     if (s) ui.showStock(s);
   },
   onPanelClose: () => { selectedAgent = null; },
-  onGoLive: () => { liveWanted = true; },
+  onGoLive: () => { liveWanted = true; document.getElementById('optLive').checked = true; },
+  onLiveToggle: (on) => {
+    liveWanted = on;
+    if (!on && replay.mode === 'live') { const ds = Object.keys(history.daily_scans).sort(); playDate(ds[ds.length - 1]); }
+  },
+  onFloorLabels: (on) => { office.floorLabels.visible = on; },
 });
 let liveWanted = true; // otomatis ikut LIVE saat bot berjalan
 const replay = new Replay({ office, agents, fx, ui, onLights: (on) => { lightTarget = on ? 1 : 0; } });

@@ -53,7 +53,7 @@ export class Chat {
     const ask = (e) => { const b = e.target.closest('[data-q]'); if (b) this.send(b.dataset.q); };
     $('chatChips').onclick = ask;
     $('chatLog').onclick = ask;
-    $('chatEngine').textContent = CONFIG.CHAT_API_URL ? 'menghubungkan…' : 'mode data screener';
+    $('chatEngine').textContent = CONFIG.CHAT_API_URL ? '…' : 'data screener';
     if (CONFIG.CHAT_API_URL) {
       this.ping();
       setInterval(() => this.ping(), 15000); // server analis bisa menyala belakangan
@@ -65,9 +65,11 @@ export class Chat {
     try {
       const r = await fetch(this.apiUrl('/api/health'));
       const j = await r.json();
-      $('chatEngine').textContent = j.engine === 'ai' ? '● online' : '● online · mode ringkas';
+      $('chatEngine').textContent = j.engine === 'ai' ? 'online' : 'online · ringkas';
+      $('chatEngine').className = 'src ok';
     } catch {
-      $('chatEngine').textContent = '○ offline · mode data screener';
+      $('chatEngine').textContent = 'offline';
+      $('chatEngine').className = 'src';
     }
   }
 
