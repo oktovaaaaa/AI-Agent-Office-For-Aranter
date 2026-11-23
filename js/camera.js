@@ -86,14 +86,14 @@ export class CameraRig {
     const p = player.pos;
     const f = this.forward();
     if (this.mode === 'first') {
-      this.head.set(p.x + f.x * 0.12, 1.72, p.z + f.z * 0.12);
+      this.head.set(p.x + f.x * 0.12, 1.72 + p.y, p.z + f.z * 0.12);
       this.camera.position.copy(this.head);
       const c = Math.cos(this.pitch);
       this.camera.lookAt(this.head.x + f.x * c, this.head.y - Math.sin(this.pitch), this.head.z + f.z * c);
       return;
     }
     // orang ke-3: kamera di belakang & atas pemain, tidak menembus dinding/furnitur
-    this.head.set(p.x, 1.55, p.z);
+    this.head.set(p.x, 1.55 + p.y * 0.6, p.z);
     const c = Math.cos(this.pitch);
     const off = new THREE.Vector3(Math.sin(this.yaw) * c, Math.sin(this.pitch), Math.cos(this.yaw) * c);
     let d = this.dist;

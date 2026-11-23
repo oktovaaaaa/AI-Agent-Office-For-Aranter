@@ -109,8 +109,8 @@ function setCameraMode(mode) {
   if (mode === 'drone') researchReturn();
   else if (chatOpen) researchVisit();
   if (mode !== 'drone') ui.toast(mode === 'first'
-    ? 'Mode Mata · WASD/panah untuk berjalan · drag untuk melihat sekeliling · V ganti kamera'
-    : 'Mode Jalan · WASD/panah · Shift lari · drag putar kamera · scroll zoom · V ganti kamera');
+    ? 'Mode Mata · WASD/panah jalan · W W (tahan) lari · Spasi lompat · drag lihat sekeliling · V ganti kamera'
+    : 'Mode Jalan · WASD/panah · W W (tahan) / Shift lari · Spasi lompat · drag putar kamera · scroll zoom · V ganti kamera', 6000);
 }
 
 // Analis Riset AI menghampiri pemain saat chat dibuka (mode Jalan/Mata)

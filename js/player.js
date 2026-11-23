@@ -4,7 +4,10 @@ const isTyping = (e) => {
   const t = e.target;
   return t && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName));
 };
-const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
+const DOUBLE_TAP_MS = 300;
+const GRAVITY = 18;
+const JUMP_SPEED = 6.2;
 
 function lerpAngle(a, b, t) {
   let d = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
@@ -28,13 +31,27 @@ export class Player {
     this.joy = { x: 0, y: 0 };
     this.active = false;
     this.moving = false;
+    this.sprintLatch = false; // aktif setelah W/↑ diketuk 2x cepat, selama tombol masih ditahan
+    this.lastTap = { code: '', t: 0 };
+    this.vy = 0;             // kecepatan vertikal (lompat)
+    this.onGround = true;
+    this.jumpQueued = false;
 
     addEventListener('keydown', (e) => {
       if (isTyping(e)) return;
+      if (!e.repeat && (e.code === 'KeyW' || e.code === 'ArrowUp')) {
+        const now = performance.now();
+        if (this.lastTap.code === e.code && now - this.lastTap.t < DOUBLE_TAP_MS) this.sprintLatch = true;
+        this.lastTap = { code: e.code, t: now };
+      }
+      if (e.code === 'Space' && !e.repeat) this.jump();
       this.keys.add(e.code);
       if (this.active && MOVE_KEYS.includes(e.code)) e.preventDefault();
     });
-    addEventListener('keyup', (e) => this.keys.delete(e.code));
+    addEventListener('keyup', (e) => {
+      this.keys.delete(e.code);
+      if (e.code === 'KeyW' || e.code === 'ArrowUp') this.sprintLatch = false;
+    });
     addEventListener('blur', () => this.keys.clear());
     this.setupJoystick();
   }
@@ -45,7 +62,11 @@ export class Player {
     this.active = on;
     this.agent.root.visible = on && !firstPerson;
     document.body.classList.toggle('walking', on);
-    if (!on) this.keys.clear();
+    if (!on) { this.keys.clear(); this.sprintLatch = false; }
+  }
+
+  jump() {
+    if (this.active && this.onGround) this.jumpQueued = true;
   }
 
   setupJoystick() {
@@ -69,11 +90,22 @@ export class Player {
     });
     pad.addEventListener('pointerup', reset);
     pad.addEventListener('pointercancel', reset);
+    const jb = document.getElementById('jumpBtn');
+    if (jb) jb.addEventListener('pointerdown', (e) => { e.preventDefault(); this.jump(); });
   }
 
   // yaw kamera: arah "maju" = (-sin yaw, -cos yaw)
   update(dt, yaw) {
     if (!this.active) { this.agent.manualSpeed = 0; return; }
+    // lompat + gravitasi
+    const root = this.agent.root;
+    if (this.jumpQueued && this.onGround) { this.vy = JUMP_SPEED; this.onGround = false; }
+    this.jumpQueued = false;
+    if (!this.onGround) {
+      this.vy -= GRAVITY * dt;
+      root.position.y += this.vy * dt;
+      if (root.position.y <= 0) { root.position.y = 0; this.vy = 0; this.onGround = true; }
+    }
     const k = (c) => (this.keys.has(c) ? 1 : 0);
     let f = k('KeyW') + k('ArrowUp') - k('KeyS') - k('ArrowDown') + this.joy.y;
     let s = k('KeyD') + k('ArrowRight') - k('KeyA') - k('ArrowLeft') + this.joy.x;
@@ -85,7 +117,9 @@ export class Player {
       let dx = fx * f + rx * s, dz = fz * f + rz * s;
       const dl = Math.hypot(dx, dz) || 1;
       dx /= dl; dz /= dl;
-      speed = (this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') ? 5.6 : 3.1) * len;
+      const sprint = this.sprintLatch || this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || Math.hypot(this.joy.x, this.joy.y) > 0.97;
+      this.sprinting = sprint;
+      speed = (sprint ? 6.2 : 3.1) * len;
       const pos = this.pos;
       if (this.nav) this.nav.move(pos, dx * speed * dt, dz * speed * dt, 0.28);
       else { pos.x += dx * speed * dt; pos.z += dz * speed * dt; }
@@ -93,6 +127,7 @@ export class Player {
     }
     this.moving = speed > 0;
     this.agent.manualSpeed = speed;
+    this.agent.airborne = !this.onGround;
     this.agent.update(dt);
   }
 }

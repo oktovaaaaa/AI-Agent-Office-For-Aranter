@@ -176,3 +176,6 @@ body.hide-tags .nametag { display: none; }
 .joy { display: none; position: fixed; left: 22px; bottom: 76px; width: 116px; height: 116px; border-radius: 50%; background: rgba(255,255,255,.35); border: 1px solid rgba(31,35,40,.12); backdrop-filter: blur(6px); z-index: 6; touch-action: none; }
 .joy-knob { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; border-radius: 50%; background: rgba(31,35,40,.7); transform: translate(-50%, -50%); }
 @media (pointer: coarse) { body.walking .joy { display: block; } }
+
+.jump-btn { display: none; position: fixed; left: 150px; bottom: 96px; width: 64px; height: 64px; border-radius: 50%; font-size: 26px; background: rgba(31,35,40,.7); color: #fff; border: 0; z-index: 6; touch-action: none; }
+@media (pointer: coarse) { body.walking .jump-btn { display: block; } }

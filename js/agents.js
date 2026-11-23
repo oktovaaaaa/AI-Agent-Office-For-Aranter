@@ -158,7 +158,13 @@ export class Agent {
     const k = Math.min(1, dt * 10);
     if (this.manual) { // karakter pemain: posisi digerakkan input, di sini hanya animasi
       const sp = this.manualSpeed || 0;
-      if (sp > 0.05) {
+      if (this.airborne) { // kaki ditekuk, tangan terangkat saat di udara
+        p.legL.rotation.x += (-0.6 - p.legL.rotation.x) * k;
+        p.legR.rotation.x += (0.35 - p.legR.rotation.x) * k;
+        p.armL.rotation.x += (-2.4 - p.armL.rotation.x) * k;
+        p.armR.rotation.x += (-2.4 - p.armR.rotation.x) * k;
+        p.body.position.y = 0;
+      } else if (sp > 0.05) {
         const s = Math.sin(this.phase * (6 + sp * 1.7)) * Math.min(0.75, 0.3 + sp * 0.09);
         p.legL.rotation.x = s; p.legR.rotation.x = -s;
         p.armL.rotation.x = -s * 0.8; p.armR.rotation.x = s * 0.8;
